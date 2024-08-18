@@ -120,20 +120,56 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   }
 
   Future<void> fetchQuestions() async {
-    final response = await http.get(Uri.parse('http://localhost:8080/api/quiz'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+    try {
+      final response = await http.get(Uri.parse('http://localhost:8080/api/quiz'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          questions = (data['questions'] as List)
+              .map((q) => Question.fromJson(q))
+              .toList();
+          isLoading = false;
+        });
+        startTimer();
+        _animationController.forward();
+      } else {
+        throw Exception('Failed to load questions. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
       setState(() {
-        questions = (data['questions'] as List)
-            .map((q) => Question.fromJson(q))
-            .toList();
         isLoading = false;
       });
-      startTimer();
-      _animationController.forward();
-    } else {
-      throw Exception('Failed to load questions');
+      showErrorDialog('Error loading questions: $e');
     }
+  }
+
+  void showErrorDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          CupertinoDialogAction(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Return to home screen
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String cleanImageUrl(String url) {
+    // Remove any duplicate "http://" or "https://"
+    final regex = RegExp(r'(https?:\/\/)+(.*)', caseSensitive: false);
+    final match = regex.firstMatch(url);
+    if (match != null) {
+      return '${match.group(1)}${match.group(2)}';
+    }
+    return url;
   }
 
   void startTimer() {
@@ -266,9 +302,19 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                               Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Image.network(
-                                  questions[currentQuestion].imageUrl,
+                                  cleanImageUrl(questions[currentQuestion].imageUrl),
                                   height: 200,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print('Error loading image: $error');
+                                    return Text('Failed to load image');
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CupertinoActivityIndicator(),
+                                    );
+                                  },
                                 ),
                               ),
                             ...questions[currentQuestion].options.asMap().entries.map((option) {
