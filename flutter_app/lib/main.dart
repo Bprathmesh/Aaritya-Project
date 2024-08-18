@@ -61,8 +61,17 @@ class Question {
   final String text;
   final List<String> options;
   final int answer;
+  final String hint;
+  final String imageUrl;
 
-  Question({required this.id, required this.text, required this.options, required this.answer});
+  Question({
+    required this.id,
+    required this.text,
+    required this.options,
+    required this.answer,
+    required this.hint,
+    required this.imageUrl,
+  });
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
@@ -70,6 +79,8 @@ class Question {
       text: json['text'],
       options: List<String>.from(json['options']),
       answer: json['answer'],
+      hint: json['hint'],
+      imageUrl: json['imageUrl'],
     );
   }
 }
@@ -84,6 +95,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   int currentQuestion = 0;
   int score = 0;
   bool isLoading = true;
+  bool isHintVisible = false;
   late AnimationController _animationController;
   late Animation<double> _animation;
   Timer? _timer;
@@ -118,6 +130,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         isLoading = false;
       });
       startTimer();
+      _animationController.forward();
     } else {
       throw Exception('Failed to load questions');
     }
@@ -140,6 +153,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     _timer?.cancel();
     setState(() {
       _timeLeft = 30;
+      isHintVisible = false;
     });
     startTimer();
   }
@@ -158,6 +172,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     if (currentQuestion < questions.length - 1) {
       setState(() {
         currentQuestion++;
+        isHintVisible = false;
       });
       _animationController.forward(from: 0.0);
       resetTimer();
@@ -170,6 +185,12 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         ),
       );
     }
+  }
+
+  void showHint() {
+    setState(() {
+      isHintVisible = true;
+    });
   }
 
   Future<void> playSound(String soundFile) async {
@@ -201,54 +222,80 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           style: TextStyle(fontSize: 18, color: CupertinoColors.systemRed),
                         ),
                       ],
-    )
-  ),
+                    ),
+                  ),
                   Container(
                     height: 6,
                     child: ClipRRect(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                       child: CupertinoListSection.insetGrouped(
-                          margin: EdgeInsets.zero,
-                          children: [
-                        Container(
-                          height: 6,
-                          child: FractionallySizedBox(
-                            widthFactor: (currentQuestion + 1) / questions.length,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: CupertinoColors.activeBlue,
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                        margin: EdgeInsets.zero,
+                        children: [
+                          Container(
+                            height: 6,
+                            child: FractionallySizedBox(
+                              widthFactor: (currentQuestion + 1) / questions.length,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: CupertinoColors.activeBlue,
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
                               ),
                             ),
                           ),
-                        )
-                      ]),
+                        ],
+                      ),
                     ),
                   ),
                   Expanded(
                     child: FadeTransition(
                       opacity: _animation,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              questions[currentQuestion].text,
-                              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          ...questions[currentQuestion].options.asMap().entries.map((option) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                              child: CupertinoButton.filled(
-                                child: Text(option.value),
-                                onPressed: () => answerQuestion(option.key),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                questions[currentQuestion].text,
+                                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
                               ),
-                            );
-                          }).toList(),
-                        ],
+                            ),
+                            if (questions[currentQuestion].imageUrl.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Image.network(
+                                  questions[currentQuestion].imageUrl,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ...questions[currentQuestion].options.asMap().entries.map((option) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                                child: CupertinoButton.filled(
+                                  child: Text(option.value),
+                                  onPressed: () => answerQuestion(option.key),
+                                ),
+                              );
+                            }).toList(),
+                            SizedBox(height: 20),
+                            CupertinoButton(
+                              child: Text('Show Hint'),
+                              onPressed: showHint,
+                            ),
+                            if (isHintVisible)
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  questions[currentQuestion].hint,
+                                  style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
