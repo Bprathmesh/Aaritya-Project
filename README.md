@@ -21,25 +21,23 @@ This Quiz App is a dynamic, interactive application that allows users to test th
 
 Here are some screenshots of the Quiz App in action:
 
-![Screenshot 1](imgsrc/a1.png)
-![Screenshot 2](imgsrc/a2.png)
-![Screenshot 3](imgsrc/a3.png)
-![Screenshot 4](imgsrc/a4.png)
+<img src="imgsrc/a1.png" alt="Screenshot 1" height="800" width="400"/>
+<img src="imgsrc/a2.png" alt="Screenshot 2" height="800" width="400"/>
+<img src="imgsrc/a3.png" alt="Screenshot 3" height="800" width="400"/>
+<img src="imgsrc/a4.png" alt="Screenshot 4" height="800" width="400"/>
 
 
 ## 🛠️ Tech Stack
 
 - Frontend: Flutter
 - Backend: Go
-- Database: [Specify your database, e.g., PostgreSQL, MySQL]
-- Hosting: [Specify your hosting platform, e.g., Firebase, Heroku]
 
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
 - Flutter (latest stable version)
 - Go (version 1.16 or later)
-- [Any other tools or SDKs required]
+
 
 ## 🚀 Getting Started
 
