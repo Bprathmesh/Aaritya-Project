@@ -51,7 +51,7 @@ class QuizApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
     return MaterialApp(
-      title: 'Enhanced Quiz App',
+      title: ' Quiz App',
       theme: theme,
       home: HomeScreen(),
     );
@@ -79,12 +79,13 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.asset(
+                
                 'assets/quiz_logo.svg',
                 height: 150,
               ),
               SizedBox(height: 30),
               Text(
-                'Welcome to Enhanced Quiz!',
+                'Welcome to Quiz App!',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               SizedBox(height: 20),
