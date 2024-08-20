@@ -51,7 +51,7 @@ class QuizApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
     return MaterialApp(
-      title: ' Quiz App',
+      title: 'Enhanced Quiz App',
       theme: theme,
       home: HomeScreen(),
     );
@@ -79,13 +79,12 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.asset(
-                
                 'assets/quiz_logo.svg',
                 height: 150,
               ),
               SizedBox(height: 30),
               Text(
-                'Welcome to Quiz App!',
+                'Welcome to Enhanced Quiz!',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               SizedBox(height: 20),
@@ -182,16 +181,33 @@ class Question {
   };
 }
 
-// Quiz provider
+// Modified Quiz provider
 final quizProvider = FutureProvider<List<Question>>((ref) async {
-  final response = await http.get(Uri.parse('http://localhost:8080/api/quiz'));
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    return (data['questions'] as List).map((q) => Question.fromJson(q)).toList();
-  } else {
-    throw Exception('Failed to load questions');
-  }
+  final apiQuestions = await fetchAPIQuestions();
+  final localQuestions = await fetchLocalQuestions();
+  return [...apiQuestions, ...localQuestions];
 });
+
+Future<List<Question>> fetchAPIQuestions() async {
+  try {
+    final response = await http.get(Uri.parse('http://localhost:8080/api/quiz'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (data['questions'] as List).map((q) => Question.fromJson(q)).toList();
+    } else {
+      throw Exception('Failed to load questions from API');
+    }
+  } catch (e) {
+    print('Error fetching API questions: $e');
+    return [];
+  }
+}
+
+Future<List<Question>> fetchLocalQuestions() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> savedQuestions = prefs.getStringList('custom_questions') ?? [];
+  return savedQuestions.map((q) => Question.fromJson(json.decode(q))).toList();
+}
 
 class QuizScreen extends ConsumerStatefulWidget {
   final List<Question>? questions;
