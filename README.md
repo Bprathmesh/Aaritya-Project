@@ -113,4 +113,3 @@ Project Link: [https://github.com/Bprathmesh/Aaritya-Project](https://github.com
 
 - [Flutter](https://flutter.dev/)
 - [Go](https://golang.org/)
-- [Any other libraries or resources you'd like to acknowledge]
