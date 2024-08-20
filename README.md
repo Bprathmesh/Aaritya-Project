@@ -17,6 +17,15 @@ This Quiz App is a dynamic, interactive application that allows users to test th
 - 🖥️ Responsive design for various screen sizes
 - 🌓 Light and dark theme options
 - ➕ Create and preview custom questions
+## 📸 Screenshots
+
+Here are some screenshots of the Quiz App in action:
+
+![Screenshot 1](imgsrc/a1.png)
+![Screenshot 2](imgsrc/a2.png)
+![Screenshot 3](imgsrc/a3.png)
+![Screenshot 4](imgsrc/a4.png)
+
 
 ## 🛠️ Tech Stack
 
